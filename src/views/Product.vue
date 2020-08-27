@@ -26,13 +26,16 @@
                                 <div class="product-pic-zoom">
                                     <img class="product-big-img" :src="gambar_default" alt="" />
                                 </div>
-                                <div class="product-thumbs">
-                                    <carousel class="product-thumbs-track ps-slider" :loop='true' :nav='false' :dots='false'>
-                                        <div class="pt" @click="changeImage(thumbs[0])" :class="thumbs[0] == gambar_default ? 'active' : '' ">
-                                            <img src="img/mickey1.jpg" alt="" />
+                                <div class="product-thumbs" v-if="productDetails.galleries.length > 0">
+                                    <carousel class="product-thumbs-track ps-slider" :loop='true' :nav='false'
+                                        :dots='false'>
+                                        <div v-for="screenshot in productDetails.galleries" :key="screenshot.id"
+                                            class="pt" @click="changeImage(screenshot.photo)"
+                                            :class="screenshot.photo == gambar_default ? 'active' : '' ">
+                                            <img :src="screenshot.photo" alt="" />
                                         </div>
 
-                                        <div class="pt" @click="changeImage(thumbs[1])" :class="thumbs[1] == gambar_default ? 'active' : '' ">
+                                        <!-- <div class="pt" @click="changeImage(thumbs[1])" :class="thumbs[1] == gambar_default ? 'active' : '' ">
                                             <img src="img/mickey2.jpg" alt="" />
                                         </div>
 
@@ -42,40 +45,29 @@
 
                                         <div class="pt" @click="changeImage(thumbs[3])" :class="thumbs[3] == gambar_default ? 'active' : '' ">
                                             <img src="img/mickey4.jpg" alt="" />
-                                        </div>
+                                        </div> -->
                                     </carousel>
                                 </div>
                             </div>
                             <div class="col-lg-6">
                                 <div class="product-details text-left">
                                     <div class="pd-title">
-                                        <span>oranges</span>
-                                        <h3>Pure Pineapple</h3>
+                                        <span>{{productDetails.type}}</span>
+                                        <h3>{{productDetails.name}}</h3>
                                     </div>
                                     <div class="pd-desc">
-                                        <p>
-                                            Lorem ipsum dolor sit amet consectetur adipisicing elit. Corporis, error
-                                            officia. Rem aperiam laborum voluptatum vel, pariatur modi hic provident eum
-                                            iure natus quos non a sequi, id accusantium! Autem.
-                                        </p>
-                                        <p>
-                                            Lorem ipsum dolor sit, amet consectetur adipisicing elit. Quam possimus
-                                            quisquam animi, commodi, nihil voluptate nostrum neque architecto illo
-                                            officiis doloremque et corrupti cupiditate voluptatibus error illum. Commodi
-                                            expedita animi nulla aspernatur.
-                                            Id asperiores blanditiis, omnis repudiandae iste inventore cum, quam sint
-                                            molestiae accusamus voluptates ex tempora illum sit perspiciatis. Nostrum
-                                            dolor tenetur amet, illo natus magni veniam quia sit nihil dolores.
-                                            Commodi ratione distinctio harum voluptatum velit facilis voluptas animi non
-                                            laudantium, id dolorem atque perferendis enim ducimus? A exercitationem
-                                            recusandae aliquam quod. Itaque inventore obcaecati, unde quam
-                                            impedit praesentium veritatis quis beatae ea atque perferendis voluptates
-                                            velit architecto?
-                                        </p>
-                                        <h4>$495.00</h4>
+                                        <p v-html="productDetails.description"></p>
+
+                                        <h4>${{productDetails.price}}</h4>
                                     </div>
                                     <div class="quantity">
-                                        <router-link to="/cart" class="primary-btn pd-cart">Add to Cart</router-link>
+                                        <router-link to="/cart" >
+                                       <a href="#" @click="saveCart(productDetails.id, 
+                                       productDetails.name, 
+                                       productDetails.price, 
+                                       productDetails.galleries[0].photo)" 
+                                       class="primary-btn pd-cart">Add to Cart</a> 
+                                        </router-link>
                                     </div>
                                 </div>
                             </div>
@@ -86,7 +78,7 @@
         </section>
         <!-- Product Shop Section End -->
 
-        <RelatedZeeb/>
+        <RelatedZeeb />
 
 
         <FooterZeeb />
@@ -98,6 +90,7 @@
     import RelatedZeeb from "@/components/RelatedZeeb.vue";
     import FooterZeeb from "@/components/FooterZeeb.vue";
     import carousel from 'vue-owl-carousel';
+    import axios from 'axios';
 
 
     // @ is an alias to /src
@@ -111,26 +104,57 @@
             carousel
         },
         data() {
-            return{
-                gambar_default : 'img/mickey1.jpg',
-                thumbs : [
-                    'img/mickey1.jpg',
-                    'img/mickey2.jpg',
-                    'img/mickey3.jpg',
-                    'img/mickey4.jpg'
-                ]
+            return {
+                gambar_default: '',
+                productDetails: [],
+                cartUser: []
             }
         },
-        methods:{
-            changeImage(urlImage){
+
+        methods: {
+            changeImage(urlImage) {
                 this.gambar_default = urlImage;
+            },
+            setDataPicture(data) {
+                //replace object productDetails dengan data dari API
+                this.productDetails = data;
+                //replace value gambar default dengan data dari API galleries
+                this.gambar_default = data.galleries[0].photo;
+            },
+            saveCart(idProduct, nameProduct, priceProduct, photoProduct){
+                var productStored ={
+                    "id" : idProduct,
+                    "name" : nameProduct,
+                    "photo" :photoProduct,
+                    "price" : priceProduct
+                }
+                this.cartUser.push(productStored);
+                const parsed = JSON.stringify(this.cartUser);
+                localStorage.setItem('cartUser', parsed);
             }
+        },
+        mounted() {
+            if (localStorage.getItem('cartUser')) {
+                try {
+                    this.cartUser = JSON.parse(localStorage.getItem('cartUser'));
+                } catch (e) {
+                    localStorage.removeItem('cartUser');
+                }
+            }
+            axios
+                .get('http://shayna-backend.belajarkoding.com/api/products', {
+                    params: {
+                        id: this.$route.params.id
+                    }
+                })
+                .then(res => (this.setDataPicture(res.data.data)))
+                .catch(err => console.log(err));
         }
     };
 </script>
 
 <style scoped>
-.product-thumbs .pt{
-    margin-right: 10px;
-}
+    .product-thumbs .pt {
+        margin-right: 10px;
+    }
 </style>
