@@ -45,7 +45,7 @@
                               <h6>{{cart.name}}</h6>
                             </div>
                           </td>
-                          <td @click="removeItem(cartUser.index)" class="si-close">
+                          <td @click="removeItem(cart.id)" class="si-close">
                             <i class="ti-close"></i>
                           </td>
                         </tr>
@@ -86,10 +86,19 @@
       };
     },
     methods: {
-      removeItem(index) {
+      removeItem(idx) {
+        //mencari tahu id dari item yang akan dihapus
+        let cartUserStorage = JSON.parse(localStorage.getItem('cartUser'));
+        let itemCartUserStorage = cartUserStorage.map(itemCartUserStorage => itemCartUserStorage.id);
+
+        //mencocokan idx item dengan id yang ada di storage
+        let index = itemCartUserStorage.findIndex(id => id == idx);
         this.cartUser.splice(index, 1);
+
         const parsed = JSON.stringify(this.cartUser);
-        localStorage.setItem('cartUser', parsed);
+        localStorage.setItem('cartUser',parsed);
+
+        window.location.reload();
       }
     },
     mounted() {

@@ -123,6 +123,14 @@ export default {
         .get('http://shayna-backend.belajarkoding.com/api/products')
         .then(res => (this.products = res.data.data.data))
         .catch(err => console.log(err));
+
+        if (localStorage.getItem('cartUser')) {
+        try {
+          this.cartUser = JSON.parse(localStorage.getItem('cartUser'));
+        } catch (e) {
+          localStorage.removeItem('cartUser');
+        }
+      }
     },
     methods:{
          saveCart(idProduct, nameProduct, priceProduct, photoProduct){
@@ -135,6 +143,8 @@ export default {
                 this.cartUser.push(productStored);
                 const parsed = JSON.stringify(this.cartUser);
                 localStorage.setItem('cartUser', parsed);
+
+                window.location.reload();
             }
 
     }
