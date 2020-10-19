@@ -142,7 +142,7 @@
                 }
             }
             axios
-                .get('http://shayna-backend.belajarkoding.com/api/products', {
+                .get('http://localhost:8080//api/products', {
                     params: {
                         id: this.$route.params.id
                     }

@@ -150,7 +150,7 @@ export default {
               "transaction_details" : productId
           };
           axios
-          .post("http://shayna-backend.belajarkoding.com/api/checkout", checkoutData)
+          .post("http://localhost:8080//api/checkout", checkoutData)
           .then( ()=> this.$router.push('success'))
           .catch(err => console.log(err));
       }

@@ -120,7 +120,7 @@ export default {
     },
     mounted(){
         axios
-        .get('http://shayna-backend.belajarkoding.com/api/products')
+        .get(' http://localhost:8080//api/products')
         .then(res => (this.products = res.data.data.data))
         .catch(err => console.log(err));
 
